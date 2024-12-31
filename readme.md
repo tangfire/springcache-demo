@@ -107,7 +107,7 @@ public class CacheDemoApplication {
     }
 ```
 
-#### 3. CacheEvict
+#### 3. @CacheEvict
 
 ```java
 
