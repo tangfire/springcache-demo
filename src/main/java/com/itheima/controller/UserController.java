@@ -16,6 +16,12 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+
+    /**
+     * CachePut：将方法返回值放入缓存
+     * cacheNames：缓存的名称，每个缓存名称下面可以有多个key
+     * key：缓存的key
+     */
     @PostMapping
 //    @CachePut(cacheNames = "userCache",key = "#result.id") // 从返回值拿到key  -> key = "#result.id"
 //    @CachePut(cacheNames = "userCache",key = "#p0.id") // 从第一个参数中拿到key -> key = "#p0.id"
@@ -27,6 +33,12 @@ public class UserController {
         return user;
     }
 
+
+    /**
+     * CacheEvict：清理指定缓存
+     * cacheNames：缓存的名称，每个缓存名称下面可以有多个key
+     * key：缓存的key
+     */
     @DeleteMapping
     @CacheEvict(cacheNames = "userCache",key = "#id") // key的生成:userCache::id
     public void deleteById(Long id){

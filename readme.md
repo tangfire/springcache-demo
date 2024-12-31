@@ -8,6 +8,7 @@ Spring Cache是Spring提供的一个缓存框架，基于AOP原理，实现了�
 
 [Spring cache的使用](https://blog.csdn.net/qq_46637011/article/details/142032536)
 
+[Spring Cache简单介绍和使用](https://blog.csdn.net/m0_62946761/article/details/129368226)
 
 ## 1. 常用的 Spring Cache 注解
 
@@ -55,6 +56,78 @@ public class CacheDemoApplication {
 }
 
 
+```
+
+### 2.3 使用API
+
+#### 1. @CachePut
+
+```java
+ @Autowired
+    private UserMapper userMapper;
+
+    /**
+     * CachePut：将方法返回值放入缓存
+     * cacheNames：缓存的名称，每个缓存名称下面可以有多个key
+     * key：缓存的key
+     */
+    @PostMapping
+//    @CachePut(cacheNames = "userCache",key = "#result.id") // 从返回值拿到key  -> key = "#result.id"
+//    @CachePut(cacheNames = "userCache",key = "#p0.id") // 从第一个参数中拿到key -> key = "#p0.id"
+//    @CachePut(cacheNames = "userCache",key = "#a0.id") // 从第一个参数中拿到key -> key = "#a0.id"
+//    @CachePut(cacheNames = "userCache",key = "#root.args[0].id") // 从第一个参数中拿到key -> key = "#root.args[0].id"
+    @CachePut(cacheNames = "userCache",key = "#user.id") // 如果使用Spring Cache缓存数据,key的生成:userCache::user.id  从参数中拿到key -> key = "#user.id"
+    public User save(@RequestBody User user){
+        userMapper.insert(user);
+        return user;
+    }
+```
+
+#### 2. @Cacheable
+
+在方法执行前spring先查看缓存中是否有数据，如果有数据，则直接返回缓存数据；若没有数据，调用方法并将方法返回值放到缓存中
+
+```java
+ /**
+     * 条件查询
+     *
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询套餐")
+    @Cacheable(cacheNames = "setmealCache",key = "#categoryId") // eg: key = setmealCache::categoryId
+    public Result<List<Setmeal>> list(Long categoryId) {
+        Setmeal setmeal = new Setmeal();
+        setmeal.setCategoryId(categoryId);
+        setmeal.setStatus(StatusConstant.ENABLE);
+
+        List<Setmeal> list = setmealService.list(setmeal);
+        return Result.success(list);
+    }
+```
+
+#### 3. CacheEvict
+
+```java
+
+
+    /**
+     * CacheEvict：清理指定缓存
+     * cacheNames：缓存的名称，每个缓存名称下面可以有多个key
+     * key：缓存的key
+     */
+    @DeleteMapping
+    @CacheEvict(cacheNames = "userCache",key = "#id") // key的生成:userCache::id
+    public void deleteById(Long id){
+        userMapper.deleteById(id);
+    }
+
+	@DeleteMapping("/delAll")
+    @CacheEvict(cacheNames = "userCache",allEntries=true)
+    public void deleteAll(){
+        userMapper.deleteAll();
+    }
 ```
 
 ## 3. Spring Cache 的工作原理
